@@ -16,12 +16,13 @@ from .prompts import SYSTEM_PROMPT, build_workout_prompt
 load_dotenv()
 
 # Supported Groq Models
-DEFAULT_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_MODEL = "qwen/qwen3.8-27b"
 AVAILABLE_MODELS = [
-    "llama-3.3-70b-versatile",
-    "llama-3.1-8b-instant",
-    "mixtral-8x7b-32768",
-    "gemma2-9b-it",
+    "qwen/qwen3.8-27b",
+    "qwen/qwen3.6-27b",
+    "groq/compound",
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
 ]
 
 

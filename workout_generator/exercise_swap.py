@@ -19,7 +19,7 @@ def swap_single_exercise(
     reason: str,
     profile: UserProfile,
     api_key: Optional[str] = None,
-    model: str = "llama-3.3-70b-versatile",
+    model: str = "qwen/qwen3.8-27b",
 ) -> SwapResult:
     """
     Generates tailored alternative exercises for a specific movement based on

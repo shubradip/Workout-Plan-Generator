@@ -107,7 +107,7 @@ with st.sidebar:
         "LLM Model",
         options=AVAILABLE_MODELS,
         index=0,
-        help="Llama-3.3-70b offers superior reasoning for complex constraints."
+        help="Fast LLM inference models powered by Groq LPU."
     )
 
     temperature = st.slider(

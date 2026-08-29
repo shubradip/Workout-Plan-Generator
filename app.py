@@ -1,6 +1,8 @@
 """
-Workout Plan Generator - Single Page Streamlit Application
-Powered by Groq API and LLMs.
+Personalized Workout Plan Generator - Single Page Web Application
+Authored by Shubradip.
+
+Engineered with Streamlit and Groq LLM API.
 """
 
 import os
@@ -11,13 +13,12 @@ from workout_generator.models import UserProfile, PRESETS
 from workout_generator.generator import generate_workout_plan, AVAILABLE_MODELS, DEFAULT_MODEL
 from workout_generator.exercise_swap import swap_single_exercise
 
-# Load environment variables (.env)
+# Load environment configuration
 load_dotenv()
 
 # Page configuration
 st.set_page_config(
-    page_title="AI Workout Plan Generator | Groq LLM",
-    page_icon="🏋️",
+    page_title="Personalized Workout Plan Generator",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -27,41 +28,38 @@ st.markdown(
     """
     <style>
     .main-header {
-        font-size: 2.3rem;
+        font-size: 2.2rem;
         font-weight: 800;
-        color: #1E293B;
+        color: #0F172A;
         margin-bottom: 0.2rem;
+        letter-spacing: -0.02em;
     }
     .sub-header {
-        font-size: 1.1rem;
-        color: #64748B;
+        font-size: 1.05rem;
+        color: #475569;
         margin-bottom: 1.5rem;
+        line-height: 1.5;
     }
     .badge-tag {
         display: inline-block;
-        padding: 4px 10px;
+        padding: 5px 12px;
         border-radius: 6px;
         font-size: 0.85rem;
         font-weight: 600;
         background-color: #EEF2FF;
-        color: #4F46E5;
+        color: #4338CA;
         margin-right: 6px;
         margin-bottom: 6px;
+        border: 1px solid #C7D2FE;
     }
     .injury-badge {
         background-color: #FEF2F2;
-        color: #DC2626;
+        color: #B91C1C;
+        border-color: #FECACA;
     }
     .stButton>button {
-        border-radius: 8px;
+        border-radius: 6px;
         font-weight: 600;
-    }
-    .stat-box {
-        background: #F8FAFC;
-        border-radius: 10px;
-        padding: 15px;
-        border: 1px solid #E2E8F0;
-        text-align: center;
     }
     </style>
     """,
@@ -82,60 +80,59 @@ if "swap_results" not in st.session_state:
 
 # Sidebar Configuration
 with st.sidebar:
-    st.header("⚙️ Configuration")
+    st.header("Configuration")
     
-    # Check if key is available in environment
     env_api_key = os.environ.get("GROQ_API_KEY", "")
     
     groq_api_key = st.text_input(
         "Groq API Key",
         value=env_api_key,
         type="password",
-        help="Get your free key at https://console.groq.com/keys",
+        help="Access key from console.groq.com",
         placeholder="gsk_..."
     )
 
     if groq_api_key:
-        st.success("🔑 API Key configured", icon="✅")
+        st.success("API Key configured")
     else:
-        st.warning("⚠️ API Key needed to generate plans.", icon="🔑")
+        st.warning("API Key required to generate workouts.")
 
     st.markdown("---")
-    st.subheader("🤖 Model & Sampling")
+    st.subheader("Model and Parameters")
     
     selected_model = st.selectbox(
-        "LLM Model",
+        "LLM Inference Model",
         options=AVAILABLE_MODELS,
         index=0,
-        help="Fast LLM inference models powered by Groq LPU."
+        help="High-speed reasoning model endpoints via Groq LPU."
     )
 
     temperature = st.slider(
-        "Creativity / Temperature",
+        "Sampling Temperature",
         min_value=0.0,
         max_value=1.0,
         value=0.5,
         step=0.1,
-        help="Lower values produce more deterministic, standardized plans; higher values offer variety."
+        help="Controls output diversity: lower values are more deterministic, higher values produce greater variety."
     )
 
     st.markdown("---")
-    st.subheader("⚡ Quick Presets (1-Click Test)")
+    st.subheader("Evaluation Presets")
     preset_choice = st.selectbox(
-        "Load a sample profile:",
+        "Load sample profile:",
         options=["-- Select a preset --"] + list(PRESETS.keys()),
         index=0
     )
 
     st.markdown("---")
     st.caption("AI Engineering Cohort • Assignment 2")
-    st.caption("Built with Streamlit & Groq API")
+    st.caption("Developed by Shubradip")
 
 
-# Main UI Header
-st.markdown('<div class="main-header">🏋️ AI Personalized Workout Generator</div>', unsafe_allow_html=True)
+# Main Header
+st.markdown('<div class="main-header">Personalized Workout Plan Generator</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="sub-header">Design safe, structured, and science-based weekly workout plans tailored strictly to your goals, available equipment, and physical limitations.</div>',
+    '<div class="sub-header">Evidence-based weekly workout programming tailored to your goals, equipment, and physical constraints.</div>',
     unsafe_allow_html=True,
 )
 
@@ -144,114 +141,114 @@ active_preset = PRESETS.get(preset_choice) if preset_choice != "-- Select a pres
 
 # Input Form
 with st.container():
-    st.subheader("📋 Step 1: Your Fitness Profile & Constraints")
+    st.subheader("Step 1: Fitness Profile and Constraints")
     
     col1, col2 = st.columns([1, 1])
 
     with col1:
         fitness_goal = st.selectbox(
-            "🎯 Primary Fitness Goal *",
+            "Primary Fitness Goal",
             options=[
-                "Build muscle (Hypertrophy)",
-                "Lose fat & tone",
-                "General fitness & health",
-                "Improve endurance & conditioning",
-                "Strength & Power",
+                "Build Muscle (Hypertrophy)",
+                "Lose Fat and Lean Conditioning",
+                "General Fitness and Health",
+                "Improve Endurance and Conditioning",
+                "Strength and Power Development",
             ],
             index=0 if not active_preset else [
-                "Build muscle (Hypertrophy)",
-                "Lose fat & tone",
-                "General fitness & health",
-                "Improve endurance & conditioning",
-                "Strength & Power",
+                "Build Muscle (Hypertrophy)",
+                "Lose Fat and Lean Conditioning",
+                "General Fitness and Health",
+                "Improve Endurance and Conditioning",
+                "Strength and Power Development",
             ].index(active_preset.fitness_goal) if active_preset.fitness_goal in [
-                "Build muscle (Hypertrophy)",
-                "Lose fat & tone",
-                "General fitness & health",
-                "Improve endurance & conditioning",
-                "Strength & Power",
-            ] else 1,
-            help="Your main physical objective."
+                "Build Muscle (Hypertrophy)",
+                "Lose Fat and Lean Conditioning",
+                "General Fitness and Health",
+                "Improve Endurance and Conditioning",
+                "Strength and Power Development",
+            ] else 0,
+            help="Your primary athletic or physical objective."
         )
 
         experience_level = st.select_slider(
-            "📊 Experience Level *",
+            "Experience Level",
             options=["Beginner", "Intermediate", "Advanced"],
             value=active_preset.experience_level if active_preset else "Beginner",
-            help="Calibrates workout volume, complexity of movements, and progression rate."
+            help="Calibrates weekly volume, movement complexity, and loading intensity."
         )
 
         days_per_week = st.slider(
-            "📅 Workout Days per Week *",
+            "Workout Days per Week",
             min_value=1,
             max_value=7,
             value=active_preset.days_per_week if active_preset else 3,
-            help="How many days per week you can commit to training."
+            help="Weekly training frequency committed."
         )
 
         session_duration = st.select_slider(
-            "⏱️ Target Session Duration (Minutes) *",
+            "Target Session Duration (Minutes)",
             options=[20, 30, 45, 60, 75, 90],
             value=active_preset.session_duration_minutes if active_preset else 45,
-            help="Time available per workout session."
+            help="Available time per training session."
         )
 
     with col2:
         equipment_options = [
-            "No equipment (Bodyweight only)",
-            "Home dumbbells & resistance bands",
-            "Full gym (Barbells, dumbbells, cables, machines)",
+            "Bodyweight Calisthenics Only",
+            "Home Dumbbells and Resistance Bands",
+            "Full Commercial Gym (Barbells, Dumbbells, Cables, Machines)",
         ]
         
         equipment_access = st.multiselect(
-            "🛠️ Available Equipment *",
+            "Available Equipment",
             options=equipment_options,
             default=active_preset.equipment_access if active_preset else [equipment_options[1]],
-            help="Strict constraint: The AI will ONLY use equipment you select here."
+            help="Strict boundary: The generator will only select movements matching this equipment."
         )
 
         split_preference = st.selectbox(
-            "🔄 Preferred Workout Split",
+            "Preferred Workout Split",
             options=[
-                "Trainer's Choice (Optimized)",
+                "Trainer Optimized Split",
                 "Full Body",
                 "Upper / Lower Split",
                 "Push / Pull / Legs",
                 "Body-Part Specific Split",
             ],
             index=0 if not active_preset else (
-                ["Trainer's Choice (Optimized)", "Full Body", "Upper / Lower Split", "Push / Pull / Legs", "Body-Part Specific Split"].index(active_preset.split_preference)
-                if active_preset.split_preference in ["Trainer's Choice (Optimized)", "Full Body", "Upper / Lower Split", "Push / Pull / Legs", "Body-Part Specific Split"]
+                ["Trainer Optimized Split", "Full Body", "Upper / Lower Split", "Push / Pull / Legs", "Body-Part Specific Split"].index(active_preset.split_preference)
+                if active_preset.split_preference in ["Trainer Optimized Split", "Full Body", "Upper / Lower Split", "Push / Pull / Legs", "Body-Part Specific Split"]
                 else 0
             ),
-            help="Choose your preferred structure or let the trainer pick the best split for your frequency."
+            help="Split architecture or automated optimization based on frequency."
         )
 
         injuries_or_limitations = st.text_area(
-            "🩹 Injuries, Joint Pain or Physical Limitations (Optional)",
+            "Injuries or Physical Limitations (Optional)",
             value=active_preset.injuries_or_limitations if active_preset and active_preset.injuries_or_limitations else "",
-            placeholder="e.g., Bad knees (avoid deep lunges), lower back pain, shoulder impingement on bench press...",
-            help="Strict constraint: Exercises aggravating these will be excluded and safe alternatives provided."
+            placeholder="e.g., Patellar tendonitis (avoid deep knee flexion), lower back pain, anterior shoulder impingement...",
+            help="Strict boundary: Movements placing shear stress on these areas are excluded in favor of safe alternatives."
         )
 
         additional_notes = st.text_input(
-            "📝 Additional Preferences / Focus Areas (Optional)",
+            "Additional Preferences or Focus Areas (Optional)",
             value=active_preset.additional_notes if active_preset and active_preset.additional_notes else "",
-            placeholder="e.g., Focus on glutes and upper back; prefer quiet home workouts...",
-            help="Any extra instructions or focus areas."
+            placeholder="e.g., Focus on upper back and glutes; prefer low noise home routines...",
+            help="Optional personalization notes."
         )
 
 # Action Buttons
 col_btn1, col_btn2, col_btn3 = st.columns([2, 2, 1])
 
 with col_btn1:
-    generate_btn = st.button("🏋️ Generate Workout Plan", type="primary", use_container_width=True)
+    generate_btn = st.button("Generate Workout Plan", type="primary", use_container_width=True)
 
 with col_btn2:
-    regenerate_btn = st.button("🔄 Regenerate Variation", use_container_width=True, disabled=(st.session_state.generated_plan is None))
+    regenerate_btn = st.button("Regenerate Variation", use_container_width=True, disabled=(st.session_state.generated_plan is None))
 
 with col_btn3:
-    clear_btn = st.button("🗑️ Clear", use_container_width=True)
+    clear_btn = st.button("Clear Results", use_container_width=True)
 
 if clear_btn:
     st.session_state.generated_plan = None
@@ -261,15 +258,13 @@ if clear_btn:
     st.session_state.variation_count = 0
     st.rerun()
 
-# Generation Execution Handler
+# Execution Handler
 if generate_btn or regenerate_btn:
-    # 1. Check basic input validity
     if not equipment_access:
-        st.error("⚠️ Please select at least one equipment option under Available Equipment.", icon="🚫")
+        st.error("Please select at least one equipment option.")
     elif days_per_week < 1 or days_per_week > 7:
-        st.error("⚠️ Days available per week must be between 1 and 7.", icon="🚫")
+        st.error("Training frequency must be between 1 and 7 days per week.")
     else:
-        # Create UserProfile instance
         try:
             profile = UserProfile(
                 fitness_goal=fitness_goal,
@@ -282,20 +277,20 @@ if generate_btn or regenerate_btn:
                 additional_notes=additional_notes,
             )
         except Exception as e:
-            st.error(f"⚠️ Validation error in user inputs: {str(e)}")
+            st.error(f"Input validation error: {str(e)}")
             profile = None
 
         if profile:
             if regenerate_btn:
                 st.session_state.variation_count += 1
                 seed = st.session_state.variation_count
-                status_text = f"Regenerating fresh variation #{seed} with {selected_model}..."
+                status_msg = f"Generating variation #{seed} using {selected_model}..."
             else:
                 st.session_state.variation_count = 0
                 seed = None
-                status_text = f"Generating personalized workout plan with {selected_model}..."
+                status_msg = f"Generating structured workout program using {selected_model}..."
 
-            with st.spinner(status_text):
+            with st.spinner(status_msg):
                 result = generate_workout_plan(
                     profile=profile,
                     api_key=groq_api_key,
@@ -313,80 +308,79 @@ if generate_btn or regenerate_btn:
                     "variation": st.session_state.variation_count,
                 }
                 st.session_state.swap_results = None
-                st.success(f"✅ Workout plan generated successfully in {result.generation_time_sec}s!", icon="🎉")
+                st.success(f"Workout program generated successfully in {result.generation_time_sec}s")
             else:
-                st.error(result.error_message, icon="❌")
+                st.error(result.error_message)
 
-# Display Results Section
+# Results Presentation
 if st.session_state.generated_plan:
     st.markdown("---")
-    st.subheader("📋 Your Personalized Workout Plan")
+    st.subheader("Your Generated Workout Program")
 
-    # Profile Summary Badges
     p = st.session_state.current_profile
     meta = st.session_state.generation_metadata
 
     badge_html = f"""
     <div style="margin-bottom: 1rem;">
-        <span class="badge-tag">🎯 Goal: {p.fitness_goal}</span>
-        <span class="badge-tag">📊 Level: {p.experience_level}</span>
-        <span class="badge-tag">📅 Frequency: {p.days_per_week} Days/Wk</span>
-        <span class="badge-tag">⏱️ Duration: ~{p.session_duration_minutes} min/session</span>
-        <span class="badge-tag">🛠️ Equipment: {", ".join(p.equipment_access)}</span>
-        {f'<span class="badge-tag injury-badge">🩹 Limitations: {p.injuries_or_limitations}</span>' if p.has_limitations() else ''}
-        <span class="badge-tag" style="background-color: #F1F5F9; color: #475569;">🤖 Model: {meta.get('model', 'Groq')} ({meta.get('time_sec', 0)}s)</span>
+        <span class="badge-tag">Goal: {p.fitness_goal}</span>
+        <span class="badge-tag">Level: {p.experience_level}</span>
+        <span class="badge-tag">Frequency: {p.days_per_week} Days/Week</span>
+        <span class="badge-tag">Duration: ~{p.session_duration_minutes} min/session</span>
+        <span class="badge-tag">Equipment: {", ".join(p.equipment_access)}</span>
+        {f'<span class="badge-tag injury-badge">Limitations: {p.injuries_or_limitations}</span>' if p.has_limitations() else ''}
+        <span class="badge-tag" style="background-color: #F8FAFC; color: #334155; border-color: #E2E8F0;">Model: {meta.get('model', 'Groq')} ({meta.get('time_sec', 0)}s)</span>
     </div>
     """
     st.markdown(badge_html, unsafe_allow_html=True)
 
-    # Download Buttons
+    # Export Buttons
     col_dl1, col_dl2, _ = st.columns([1.5, 1.5, 3])
     with col_dl1:
         st.download_button(
-            label="📥 Download Plan (.md)",
+            label="Download Plan (.md)",
             data=st.session_state.generated_plan,
-            file_name=f"workout_plan_{p.fitness_goal.replace(' ', '_').lower()}.md",
+            file_name=f"workout_program_{p.fitness_goal.replace(' ', '_').lower()}.md",
             mime="text/markdown",
             use_container_width=True,
         )
     with col_dl2:
         st.download_button(
-            label="📄 Download Plan (.txt)",
+            label="Download Plan (.txt)",
             data=st.session_state.generated_plan,
-            file_name=f"workout_plan_{p.fitness_goal.replace(' ', '_').lower()}.txt",
+            file_name=f"workout_program_{p.fitness_goal.replace(' ', '_').lower()}.txt",
             mime="text/plain",
             use_container_width=True,
         )
 
-    # Render Markdown Content
+    # Render Program
     st.markdown(st.session_state.generated_plan)
 
-    # Stretch Goal: Single Exercise Swapper Mini-Tool
+    # Exercise Substitution Tool
     st.markdown("---")
-    with st.expander("🔄 Exercise Swapper: Need to replace an exercise?", expanded=False):
+    with st.expander("Exercise Substitution Tool", expanded=False):
         st.markdown(
-            "If an exercise causes discomfort, requires equipment that's currently occupied, or you simply prefer an alternative, enter it below to get safe, biomechanically equivalent swaps."
+            "Substitute any exercise from your program with biomechanically equivalent alternatives matching your equipment and injury constraints."
         )
         
         swap_col1, swap_col2 = st.columns([2, 3])
         with swap_col1:
             exercise_to_swap = st.text_input(
-                "Exercise Name to Replace",
-                placeholder="e.g. Barbell Back Squat, Dumbbell Overhead Press"
+                "Exercise Name to Substitute",
+                placeholder="e.g., Barbell Back Squat, Dumbbell Shoulder Press"
             )
         with swap_col2:
             swap_reason = st.text_input(
-                "Reason for Swap (Optional)",
-                placeholder="e.g. Causes knee pinch, equipment busy, want dumbbell alternative"
+                "Reason for Substitution (Optional)",
+                placeholder="e.g., Knee discomfort, equipment unavailable, prefer dumbbell variant"
             )
         
-        swap_btn = st.button("🔍 Find Safe Alternatives", type="secondary")
+        swap_btn = st.button("Find Alternative Exercises", type="secondary")
         
         if swap_btn:
             if not exercise_to_swap:
-                st.warning("Please specify the name of the exercise you want to replace.")
+                st.warning("Please specify the name of the exercise to substitute.")
             else:
-                with st.spinner("Finding safe, tailored alternatives..."):
+                with st.spinner("Analyzing biomechanical alternatives..."):
                     swap_res = swap_single_exercise(
                         original_exercise=exercise_to_swap,
                         reason=swap_reason,
@@ -400,5 +394,5 @@ if st.session_state.generated_plan:
                     st.error(swap_res.error_message)
 
         if st.session_state.swap_results:
-            st.markdown("#### 💡 Alternative Exercise Options:")
+            st.markdown("#### Alternative Exercise Options:")
             st.markdown(st.session_state.swap_results)

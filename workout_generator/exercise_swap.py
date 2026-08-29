@@ -1,11 +1,14 @@
 """
-Exercise swapping module (Stretch Goal).
-Allows users to replace individual exercises with safe, tailored alternatives.
+Exercise substitution module.
+Authored by Shubradip.
+
+Provides targeted LLM-driven exercise replacement based on biomechanical
+equivalents and user physical constraints.
 """
 
 import os
 from typing import Optional
-from groq import Groq, AuthenticationError, RateLimitError, APIConnectionError, APIStatusError
+from groq import Groq, AuthenticationError, RateLimitError, APIConnectionError
 from dotenv import load_dotenv
 
 from .models import UserProfile, SwapResult
@@ -22,35 +25,34 @@ def swap_single_exercise(
     model: str = "qwen/qwen3.8-27b",
 ) -> SwapResult:
     """
-    Generates tailored alternative exercises for a specific movement based on
-    the user's equipment and limitations.
+    Generates targeted biomechanical replacements for a specific exercise movement.
 
     Args:
-        original_exercise (str): Name of exercise to replace.
-        reason (str): Reason for swap (e.g. 'shoulder pain', 'equipment unavailable').
-        profile (UserProfile): User profile with constraints.
-        api_key (Optional[str]): Groq API key.
-        model (str): Model name.
+        original_exercise (str): Name of the exercise to substitute.
+        reason (str): Context or reason for substitution.
+        profile (UserProfile): Trainee constraints and equipment access.
+        api_key (Optional[str]): Groq API key override.
+        model (str): Target LLM model identifier.
 
     Returns:
-        SwapResult: Result containing the markdown alternatives or error message.
+        SwapResult: Data container with formatted alternative exercises or error messages.
     """
     if not original_exercise or not original_exercise.strip():
         return SwapResult(
             success=False,
-            error_message="Please specify the exercise name you want to swap.",
+            error_message="Please specify the exercise name to substitute.",
         )
 
     resolved_api_key = (api_key or "").strip() or os.environ.get("GROQ_API_KEY", "").strip()
     if not resolved_api_key:
         return SwapResult(
             success=False,
-            error_message="Groq API key is missing. Please provide your API key in the sidebar.",
+            error_message="Groq API key not found. Please provide an API key in the sidebar.",
         )
 
     prompt = build_exercise_swap_prompt(
         original_exercise=original_exercise.strip(),
-        reason=reason.strip() if reason else "Looking for a variation",
+        reason=reason.strip() if reason else "General variation request",
         profile=profile,
     )
 
@@ -69,7 +71,7 @@ def swap_single_exercise(
         if not response or not response.choices:
             return SwapResult(
                 success=False,
-                error_message="Empty response received for exercise swap.",
+                error_message="Empty response received for exercise substitution.",
             )
 
         content = response.choices[0].message.content
@@ -81,20 +83,20 @@ def swap_single_exercise(
     except AuthenticationError:
         return SwapResult(
             success=False,
-            error_message="Authentication failed: Invalid Groq API key.",
+            error_message="Authentication failed: Invalid Groq API key provided.",
         )
     except RateLimitError:
         return SwapResult(
             success=False,
-            error_message="Rate limit reached. Please wait a few seconds and try again.",
+            error_message="Rate limit reached. Please wait a moment before trying again.",
         )
     except APIConnectionError:
         return SwapResult(
             success=False,
-            error_message="Network connection error. Please check your internet.",
+            error_message="Network connection error. Unable to communicate with Groq servers.",
         )
     except Exception as e:
         return SwapResult(
             success=False,
-            error_message=f"Error swapping exercise: {str(e)}",
+            error_message=f"Error performing exercise substitution: {str(e)}",
         )

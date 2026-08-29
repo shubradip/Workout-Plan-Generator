@@ -1,6 +1,8 @@
 """
-Data models and schemas for the Workout Plan Generator.
-Includes validation rules and typed representations of user profiles and API results.
+Data models, validation rules, and schema definitions for the Workout Plan Generator.
+Authored by Shubradip.
+
+This module enforces strict type boundaries and runtime input validation using Pydantic v2.
 """
 
 from typing import List, Optional
@@ -9,68 +11,68 @@ from pydantic import BaseModel, Field, field_validator
 
 class UserProfile(BaseModel):
     """
-    Structured user inputs representing a user's fitness profile,
-    goals, constraints, and preferences.
+    Structured domain model representing a trainee's fitness profile,
+    biometric constraints, training frequency, and equipment availability.
     """
     fitness_goal: str = Field(
         ...,
-        description="Primary fitness objective (e.g., Build muscle, Lose fat, General fitness, Improve endurance, Strength & Power)"
+        description="Primary training objective (e.g., Hypertrophy, Fat Loss, Endurance, General Strength)"
     )
     experience_level: str = Field(
         ...,
-        description="User training experience (e.g., Beginner, Intermediate, Advanced)"
+        description="Training background (Beginner, Intermediate, Advanced)"
     )
     days_per_week: int = Field(
         ...,
         ge=1,
         le=7,
-        description="Number of workout days available per week (1-7)"
+        description="Weekly training frequency (1 to 7 days)"
     )
     equipment_access: List[str] = Field(
         ...,
         min_length=1,
-        description="Available equipment (e.g., No equipment, Home dumbbells, Full gym)"
+        description="Available training equipment"
     )
     session_duration_minutes: int = Field(
         default=45,
         ge=15,
         le=120,
-        description="Target duration per workout session in minutes"
+        description="Target workout duration in minutes"
     )
     split_preference: Optional[str] = Field(
-        default="Trainer's Choice (Optimized)",
-        description="Preferred workout split type"
+        default="Trainer Optimized Split",
+        description="Preferred periodization split structure"
     )
     injuries_or_limitations: Optional[str] = Field(
         default=None,
-        description="Any reported injuries, pain points, or physical limitations"
+        description="Reported musculoskeletal limitations, joint pain, or movement restrictions"
     )
     additional_notes: Optional[str] = Field(
         default=None,
-        description="Additional preferences or focus muscle groups"
+        description="Specific muscle group priorities or stylistic preferences"
     )
 
     @field_validator("days_per_week")
     @classmethod
-    def validate_days(cls, v: int) -> int:
+    def validate_frequency(cls, v: int) -> int:
         if not (1 <= v <= 7):
-            raise ValueError("Days available per week must be between 1 and 7.")
+            raise ValueError("Training frequency must be strictly between 1 and 7 days per week.")
         return v
 
     @field_validator("equipment_access")
     @classmethod
-    def validate_equipment(cls, v: List[str]) -> List[str]:
+    def validate_equipment_selection(cls, v: List[str]) -> List[str]:
         if not v:
-            raise ValueError("Please select at least one equipment option.")
+            raise ValueError("At least one equipment category must be selected.")
         return v
 
     def has_limitations(self) -> bool:
-        """Check if user specified any injury or limitation."""
+        """Determines if the user has documented any physical limitations or injuries."""
         return bool(self.injuries_or_limitations and self.injuries_or_limitations.strip())
 
 
 class GenerationResult(BaseModel):
-    """Result container for workout plan generation."""
+    """Encapsulates the output of a workout generation request."""
     success: bool
     plan_markdown: Optional[str] = None
     error_message: Optional[str] = None
@@ -79,52 +81,52 @@ class GenerationResult(BaseModel):
 
 
 class SwapResult(BaseModel):
-    """Result container for single exercise swap."""
+    """Encapsulates the response from a targeted exercise substitution request."""
     success: bool
     replacement_markdown: Optional[str] = None
     error_message: Optional[str] = None
 
 
-# Quick Presets for 1-Click Evaluation
+# Evaluation presets for rapid testing and benchmarking
 PRESETS = {
     "Busy Professional (Home Dumbbells, 3 Days)": UserProfile(
-        fitness_goal="Lose fat & get lean",
+        fitness_goal="Lose Fat and Lean Conditioning",
         experience_level="Beginner",
         days_per_week=3,
-        equipment_access=["Home dumbbells & resistance bands"],
+        equipment_access=["Home Dumbbells and Resistance Bands"],
         session_duration_minutes=35,
         split_preference="Full Body",
-        injuries_or_limitations="Tight lower back from sitting all day; no heavy spinal loading",
-        additional_notes="Focus on core stability and high calorie burn with short rest periods"
+        injuries_or_limitations="Tight lower back from desk posture; avoid direct heavy axial spinal compression",
+        additional_notes="Focus on core stability and high metabolic density with controlled rest periods"
     ),
-    "Hypertrophy Seeker (Full Gym, 5 Days)": UserProfile(
-        fitness_goal="Build muscle (Hypertrophy)",
+    "Hypertrophy Focus (Full Gym, 5 Days)": UserProfile(
+        fitness_goal="Build Muscle (Hypertrophy)",
         experience_level="Intermediate",
         days_per_week=5,
-        equipment_access=["Full gym (Barbells, dumbbells, cables, machines)"],
+        equipment_access=["Full Commercial Gym (Barbells, Dumbbells, Cables, Machines)"],
         session_duration_minutes=60,
         split_preference="Push / Pull / Legs / Upper / Lower",
         injuries_or_limitations="",
-        additional_notes="Target chest and upper back hypertrophy"
+        additional_notes="Target chest and upper back hypertrophy with progressive mechanical tension"
     ),
-    "Endurance Athlete & Joint Care (Bodyweight, 4 Days)": UserProfile(
-        fitness_goal="Improve endurance & conditioning",
+    "Endurance and Joint Care (Bodyweight, 4 Days)": UserProfile(
+        fitness_goal="Improve Endurance and Conditioning",
         experience_level="Intermediate",
         days_per_week=4,
-        equipment_access=["No equipment (Bodyweight only)"],
+        equipment_access=["Bodyweight Calisthenics Only"],
         session_duration_minutes=45,
         split_preference="Upper / Lower Split",
-        injuries_or_limitations="Patellar tendonitis (bad knees); avoid deep unassisted lunges or jumping squats",
-        additional_notes="Include low-impact cardiovascular conditioning and knee-friendly glute activation"
+        injuries_or_limitations="Patellar tendonitis; eliminate deep unassisted lunges and high-impact jumping squats",
+        additional_notes="Incorporate low-impact cardiovascular intervals and joint-friendly posterior chain activation"
     ),
-    "Strength & Power (Full Gym, 4 Days)": UserProfile(
-        fitness_goal="Strength & Power",
+    "Strength and Power (Full Gym, 4 Days)": UserProfile(
+        fitness_goal="Strength and Power Development",
         experience_level="Advanced",
         days_per_week=4,
-        equipment_access=["Full gym (Barbells, dumbbells, cables, machines)"],
+        equipment_access=["Full Commercial Gym (Barbells, Dumbbells, Cables, Machines)"],
         session_duration_minutes=75,
         split_preference="Upper / Lower Split",
-        injuries_or_limitations="Mild shoulder impingement on flat bench press",
-        additional_notes="Prefer neutral grip pressing or slight incline; focus on compound lifts"
+        injuries_or_limitations="Mild anterior shoulder impingement during standard barbell bench press",
+        additional_notes="Emphasize neutral-grip dumbbell pressing and floor presses for pressing volume"
     ),
 }
